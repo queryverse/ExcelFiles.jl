@@ -1,5 +1,12 @@
-using ExcelFiles
+using FileIO
+using IterableTables
+using DataFrames
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+@testset "ExcelFiles" begin
+
+df = load(joinpath(Pkg.dir("ExcelReaders"), "test", "TestData.xlsx"), "Sheet1") |> DataFrame
+
+@test size(df) == (4,13)
+
+end
