@@ -9,4 +9,8 @@ df = load(joinpath(Pkg.dir("ExcelReaders"), "test", "TestData.xlsx"), "Sheet1") 
 
 @test size(df) == (4,13)
 
+efile = load(joinpath(Pkg.dir("ExcelReaders"), "test", "TestData.xlsx"), "Sheet1")
+
+@test isiterable(efile) == true
+
 end
