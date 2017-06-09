@@ -24,9 +24,8 @@ git:
 #before_script: # homebrew for mac
 #  - if [ $TRAVIS_OS_NAME = osx ]; then brew install gcc; fi
 
-## uncomment the following lines to override the default test script
-#script:
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("ExcelFiles"); Pkg.test("ExcelFiles"; coverage=true)'
+script:
+  - julia -e 'Pkg.clone("https://github.com/davidanthoff/FileIO.jl.git"); Pkg.checkout("FileIO", "next"); Pkg.clone(pwd()); Pkg.build("ExcelFiles"); Pkg.test("ExcelFiles"; coverage=true)'
 after_success:
   # push coverage results to Codecov
   - julia -e 'cd(Pkg.dir("ExcelFiles")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
