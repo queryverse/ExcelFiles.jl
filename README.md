@@ -56,7 +56,7 @@ function load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
 #### Arguments:
 
 * ``range``: either the name of the sheet in the Excel file to read, or a full Excel range specification (i.e. "Sheetname!A1:B2").
-* The ``keywords`` arguments are the same as in [ExcelReaders.jl]() (which is used under the hood to read Excel files). When ``range`` is a sheet name, the keyword arguments for the ``readxlsheet`` function from ExcelReaders.jl apply, if ``range`` is a range specification, the keyword arguments for the ``readxl`` function apply.
+* The ``keywords`` arguments are the same as in [ExcelReaders.jl](https://github.com/davidanthoff/ExcelReaders.jl) (which is used under the hood to read Excel files). When ``range`` is a sheet name, the keyword arguments for the ``readxlsheet`` function from ExcelReaders.jl apply, if ``range`` is a range specification, the keyword arguments for the ``readxl`` function apply.
 
 ### Using the pipe syntax
 
