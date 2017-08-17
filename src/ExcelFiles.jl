@@ -1,7 +1,7 @@
 module ExcelFiles
 
 
-using ExcelReaders, IterableTables, DataValues, DataFrames
+using ExcelReaders, TableTraits, IterableTables, DataValues, DataFrames
 import FileIO
 
 struct ExcelFile
@@ -14,10 +14,10 @@ function load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
 
-IterableTables.isiterable(x::ExcelFile) = true
-IterableTables.isiterabletable(x::ExcelFile) = true
+TableTraits.isiterable(x::ExcelFile) = true
+TableTraits.isiterabletable(x::ExcelFile) = true
 
-function IterableTables.getiterator(file::ExcelFile)
+function TableTraits.getiterator(file::ExcelFile)
     df = contains(file.range, "!") ? readxl(DataFrame, file.filename, file.range; file.keywords...) : readxlsheet(DataFrame, file.filename, file.range)
 
     it = getiterator(df)
