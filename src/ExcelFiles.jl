@@ -66,6 +66,13 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
 
         if type_of_el <: DataValue
             columns[i] = convert(DataValueArray, vals)
+
+            # TODO Check wether this hack is correct
+            for (j,v) in enumerate(columns[i])
+                if v isa DataValue && !DataValues.isna(v) && v[] isa DataValue
+                    columns[i][j] = v[]
+                end
+            end
         else
             columns[i] = convert(Array{type_of_el}, vals)
         end
@@ -90,6 +97,10 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
     end
 
     return create_tableiterator(column_data, col_names)
+end
+
+function Base.collect(file::ExcelFile)
+    return collect(getiterator(file))
 end
 
 end # module
