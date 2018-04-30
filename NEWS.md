@@ -1,3 +1,7 @@
+# ExcelFiles.jl v0.3.0
+* Incorporate all table functionality from ExcelReaders.jl.
+* Drop dependency on DataTables.jl and DataFrames.jl.
+
 # ExcelFiles.jl v0.2.0
 * Move to TableTraits.jl
 
