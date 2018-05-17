@@ -1,3 +1,6 @@
+# ExcelFiles.jl v0.3.1
+* Fix bug related to skipstartrows etc.
+
 # ExcelFiles.jl v0.3.0
 * Incorporate all table functionality from ExcelReaders.jl.
 * Drop dependency on DataTables.jl and DataFrames.jl.
