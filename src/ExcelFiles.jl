@@ -2,9 +2,10 @@ module ExcelFiles
 
 
 using ExcelReaders, IteratorInterfaceExtensions, TableTraits, DataValues,
-    TableTraitsUtils
-import FileIO
+    TableTraitsUtils, FileIO
 import IterableTables
+
+export load, save
 
 struct ExcelFile
     filename::String
@@ -12,7 +13,7 @@ struct ExcelFile
     keywords
 end
 
-function load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
+function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
 

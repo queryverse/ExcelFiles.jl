@@ -1,4 +1,3 @@
-using FileIO
 using ExcelFiles
 using TableTraits
 using TableTraitsUtils

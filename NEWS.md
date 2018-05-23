@@ -1,3 +1,6 @@
+# ExcelFiles.jl v0.4.0
+* Export load and save
+
 # ExcelFiles.jl v0.3.1
 * Fix bug related to skipstartrows etc.
 
