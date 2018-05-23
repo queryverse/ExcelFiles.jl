@@ -22,7 +22,7 @@ Use Pkg.add("ExcelFiles") in Julia to install ExcelFiles and its dependencies.
 To read a Excel file into a ``DataFrame``, use the following julia code:
 
 ````julia
-using FileIO, ExcelFiles, DataFrames
+using ExcelFiles, DataFrames
 
 df = DataFrame(load("data.xlsx", "Sheet1"))
 ````
@@ -30,7 +30,7 @@ df = DataFrame(load("data.xlsx", "Sheet1"))
 The call to ``load`` returns a ``struct`` that is an [IterableTable.jl](https://github.com/davidanthoff/IterableTables.jl), so it can be passed to any function that can handle iterable tables, i.e. all the sinks in [IterableTable.jl](https://github.com/davidanthoff/IterableTables.jl). Here are some examples of materializing an Excel file into data structures that are not a ``DataFrame``:
 
 ````julia
-using FileIO, ExcelFiles, DataTables, IndexedTables, TimeSeries, Temporal, Gadfly
+using ExcelFiles, DataTables, IndexedTables, TimeSeries, Temporal, Gadfly
 
 # Load into a DataTable
 dt = DataTable(load("data.xlsx", "Sheet1"))
@@ -63,7 +63,7 @@ function load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
 ``load`` also support the pipe syntax. For example, to load an Excel file into a ``DataFrame``, one can use the following code:
 
 ````julia
-using FileIO, ExcelFiles, DataFrame
+using ExcelFiles, DataFrame
 
 df = load("data.xlsx", "Sheet1") |> DataFrame
 ````
