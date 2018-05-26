@@ -2,7 +2,7 @@ module ExcelFiles
 
 
 using ExcelReaders, IteratorInterfaceExtensions, TableTraits, DataValues,
-    TableTraitsUtils, FileIO
+    TableTraitsUtils, FileIO, TableShowUtils
 import IterableTables
 
 export load, save
@@ -12,6 +12,16 @@ struct ExcelFile
     range::String
     keywords
 end
+
+function Base.show(io::IO, source::ExcelFile)
+    TableShowUtils.printtable(io, getiterator(source), "Excel file")
+end
+
+function Base.show(io::IO, ::MIME"text/html", source::ExcelFile)
+    TableShowUtils.printHTMLtable(io, getiterator(source))
+end
+
+Base.Multimedia.mimewritable(::MIME"text/html", source::ExcelFile) = true
 
 function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
