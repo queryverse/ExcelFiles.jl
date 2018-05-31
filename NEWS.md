@@ -1,3 +1,6 @@
+# ExcelFiles.jl v0.5.0
+* Add show method
+
 # ExcelFiles.jl v0.4.0
 * Export load and save
 
