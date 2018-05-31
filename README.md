@@ -13,7 +13,7 @@ This package provides load support for Excel files under the
 
 ## Installation
 
-Use Pkg.add("ExcelFiles") in Julia to install ExcelFiles and its dependencies.
+Use ``Pkg.add("ExcelFiles")`` in Julia to install ExcelFiles and its dependencies.
 
 ## Usage
 
