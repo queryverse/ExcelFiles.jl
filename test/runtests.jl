@@ -1,7 +1,11 @@
 using ExcelFiles
+using ExcelReaders
+using IteratorInterfaceExtensions
 using TableTraits
 using TableTraitsUtils
-using Base.Test
+using Dates
+using DataValues
+using Test
 
 @testset "ExcelFiles" begin
 
@@ -20,18 +24,18 @@ for (df, names) in full_dfs
     @test df[2] == ["A", "BB", "CCC", "DDDD"]
     @test df[3] == [true, false, false, true]
     @test df[4] == [2, "EEEEE", false, 1.5]
-    @test df[5] == [9., "III", DataValues.NA, true]
-    @test df[6] == [3., DataValues.NA, 3.5, 4]
-    @test df[7] == ["FF", DataValues.NA, "GGG", "HHHH"]
-    @test df[8] == [DataValues.NA, true, DataValues.NA, false]
+    @test df[5] == [9., "III", NA, true]
+    @test df[6] == [3., NA, 3.5, 4]
+    @test df[7] == ["FF", NA, "GGG", "HHHH"]
+    @test df[8] == [NA, true, NA, false]
     @test df[9] == [Date(2015,3,3), DateTime(2015,2,4,10,14), Date(1988,4,9), Dates.Time(15,2,0)]
-    @test df[10] == [Date(1965,4,3), DateTime(1950,8,9,18,40), Dates.Time(19,0,0), DataValues.NA]
+    @test df[10] == [Date(1965,4,3), DateTime(1950,8,9,18,40), Dates.Time(19,0,0), NA]
     @test eltype(df[11]) == ExcelReaders.ExcelErrorCell
-    @test df[12][1] isa ExcelReaders.ExcelErrorCell
-    @test df[12][2] isa ExcelReaders.ExcelErrorCell
-    @test df[12][3] isa ExcelReaders.ExcelErrorCell
-    @test df[12][4] == DataValues.NA
-    @test df[13] == [DataValues.NA, 3.4, "HKEJW", DataValues.NA]
+    @test df[12][1][] isa ExcelReaders.ExcelErrorCell
+    @test df[12][2][] isa ExcelReaders.ExcelErrorCell
+    @test df[12][3][] isa ExcelReaders.ExcelErrorCell
+    @test df[12][4] == NA
+    @test df[13] == [NA, 3.4, "HKEJW", NA]
 end
 
 df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", header=false))
@@ -42,21 +46,21 @@ df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", hea
 @test df[2] == ["A", "BB", "CCC", "DDDD"]
 @test df[3] == [true, false, false, true]
 @test df[4] == [2, "EEEEE", false, 1.5]
-@test df[5] == [9., "III", DataValues.NA, true]
-@test df[6] == [3, DataValues.NA, 3.5, 4]
-@test df[7] == ["FF", DataValues.NA, "GGG", "HHHH"]
-@test df[8] == [DataValues.NA, true, DataValues.NA, false]
+@test df[5] == [9., "III", NA, true]
+@test df[6] == [3, NA, 3.5, 4]
+@test df[7] == ["FF", NA, "GGG", "HHHH"]
+@test df[8] == [NA, true, NA, false]
 @test df[9] == [Date(2015, 3, 3), DateTime(2015, 2, 4, 10, 14), DateTime(1988, 4, 9), Dates.Time(15,2,0)]
-@test df[10] == [Date(1965, 4, 3), DateTime(1950, 8, 9, 18, 40), Dates.Time(19,0,0), DataValues.NA]
-@test isa(df[11][1], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][2], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][3], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][4], ExcelReaders.ExcelErrorCell)
-@test isa(df[12][1], ExcelReaders.ExcelErrorCell)
-@test isa(df[12][2], ExcelReaders.ExcelErrorCell)
-@test isa(df[12][3], ExcelReaders.ExcelErrorCell)
+@test df[10] == [Date(1965, 4, 3), DateTime(1950, 8, 9, 18, 40), Dates.Time(19,0,0), NA]
+@test isa(df[11][1][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][2][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][3][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][4][], ExcelReaders.ExcelErrorCell)
+@test isa(df[12][1][], ExcelReaders.ExcelErrorCell)
+@test isa(df[12][2][], ExcelReaders.ExcelErrorCell)
+@test isa(df[12][3][], ExcelReaders.ExcelErrorCell)
 @test DataValues.isna(df[12][4])
-@test df[13] == [DataValues.NA, 3.4, "HKEJW", DataValues.NA]
+@test df[13] == [NA, 3.4, "HKEJW", NA]
 
 good_colnames = [:c1, :c2, :c3, :c4, :c5, :c6, :c7, :c8, :c9, :c10, :c11, :c12, :c13]
 df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", header=false, colnames=good_colnames))
@@ -67,21 +71,21 @@ df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", hea
 @test df[2] == ["A", "BB", "CCC", "DDDD"]
 @test df[3] == [true, false, false, true]
 @test df[4] == [2, "EEEEE", false, 1.5]
-@test df[5] == [9., "III", DataValues.NA, true]
-@test df[6] == [3, DataValues.NA, 3.5, 4]
-@test df[7] == ["FF", DataValues.NA, "GGG", "HHHH"]
-@test df[8] == [DataValues.NA, true, DataValues.NA, false]
+@test df[5] == [9., "III", NA, true]
+@test df[6] == [3, NA, 3.5, 4]
+@test df[7] == ["FF", NA, "GGG", "HHHH"]
+@test df[8] == [NA, true, NA, false]
 @test df[9] == [Date(2015, 3, 3), DateTime(2015, 2, 4, 10, 14), DateTime(1988, 4, 9), Dates.Time(15,2,0)]
-@test df[10] == [Date(1965, 4, 3), DateTime(1950, 8, 9, 18, 40), Dates.Time(19,0,0), DataValues.NA]
-@test isa(df[11][1], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][2], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][3], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][4], ExcelReaders.ExcelErrorCell)
-@test isa(df[12][1], ExcelReaders.ExcelErrorCell)
-@test isa(df[12][2], ExcelReaders.ExcelErrorCell)
-@test isa(df[12][3], ExcelReaders.ExcelErrorCell)
+@test df[10] == [Date(1965, 4, 3), DateTime(1950, 8, 9, 18, 40), Dates.Time(19,0,0), NA]
+@test isa(df[11][1][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][2][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][3][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][4][], ExcelReaders.ExcelErrorCell)
+@test isa(df[12][1][], ExcelReaders.ExcelErrorCell)
+@test isa(df[12][2][], ExcelReaders.ExcelErrorCell)
+@test isa(df[12][3][], ExcelReaders.ExcelErrorCell)
 @test DataValues.isna(df[12][4])
-@test df[13] == [DataValues.NA, 3.4, "HKEJW", DataValues.NA]
+@test df[13] == [NA, 3.4, "HKEJW", NA]
 
 # Too few colnames
 @test_throws ErrorException create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", header=true, colnames=[:c1, :c2, :c3, :c4]))

@@ -2,7 +2,7 @@ module ExcelFiles
 
 
 using ExcelReaders, IteratorInterfaceExtensions, TableTraits, DataValues,
-    TableTraitsUtils, FileIO, TableShowUtils
+    TableTraitsUtils, FileIO, TableShowUtils, Dates, Printf
 import IterableTables
 
 export load, save
@@ -31,7 +31,7 @@ IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
 TableTraits.isiterabletable(x::ExcelFile) = true
 
 function gennames(n::Integer)
-    res = Vector{Symbol}(n)
+    res = Vector{Symbol}(undef, n)
     for i in 1:n
         res[i] = Symbol(@sprintf "x%d" i)
     end
@@ -47,7 +47,7 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
         if header
             headervec = data[1, :]
             NAcol = map(i->isa(i, DataValues.DataValue) && DataValues.isna(i), headervec)
-            headervec[NAcol] = gennames(countnz(NAcol))
+            headervec[NAcol] = gennames(count(!iszero, NAcol))
 
             # This somewhat complicated conditional makes sure that column names
             # that are integer numbers end up without an extra ".0" as their name
@@ -59,7 +59,7 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
         error("Length of colnames must equal number of columns in selected range")
     end
 
-    columns = Array{Any}(ncol)
+    columns = Array{Any}(undef, ncol)
 
     for i=1:ncol
         if header
@@ -93,7 +93,7 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
 end
 
 function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
-    column_data, col_names = if contains(file.range, "!")
+    column_data, col_names = if occursin("!", file.range)
         excelfile = openxl(file.filename)
 
         sheetname, startrow, startcol, endrow, endcol = ExcelReaders.convert_ref_to_sheet_row_col(file.range)
