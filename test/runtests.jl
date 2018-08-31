@@ -9,7 +9,7 @@ using Test
 
 @testset "ExcelFiles" begin
 
-filename = normpath(Pkg.dir("ExcelReaders"),"test", "TestData.xlsx")
+filename = normpath(dirname(pathof(ExcelReaders)),"test", "TestData.xlsx")
 
 efile = load(filename, "Sheet1")
 
