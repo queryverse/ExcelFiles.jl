@@ -9,7 +9,7 @@ using Test
 
 @testset "ExcelFiles" begin
 
-filename = normpath(dirname(pathof(ExcelReaders)),"test", "TestData.xlsx")
+filename = normpath(dirname(pathof(ExcelReaders)), "..", "test", "TestData.xlsx")
 
 efile = load(filename, "Sheet1")
 
@@ -52,10 +52,10 @@ df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", hea
 @test df[8] == [NA, true, NA, false]
 @test df[9] == [Date(2015, 3, 3), DateTime(2015, 2, 4, 10, 14), DateTime(1988, 4, 9), Dates.Time(15,2,0)]
 @test df[10] == [Date(1965, 4, 3), DateTime(1950, 8, 9, 18, 40), Dates.Time(19,0,0), NA]
-@test isa(df[11][1][], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][2][], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][3][], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][4][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][1], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][2], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][3], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][4], ExcelReaders.ExcelErrorCell)
 @test isa(df[12][1][], ExcelReaders.ExcelErrorCell)
 @test isa(df[12][2][], ExcelReaders.ExcelErrorCell)
 @test isa(df[12][3][], ExcelReaders.ExcelErrorCell)
@@ -77,10 +77,10 @@ df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", hea
 @test df[8] == [NA, true, NA, false]
 @test df[9] == [Date(2015, 3, 3), DateTime(2015, 2, 4, 10, 14), DateTime(1988, 4, 9), Dates.Time(15,2,0)]
 @test df[10] == [Date(1965, 4, 3), DateTime(1950, 8, 9, 18, 40), Dates.Time(19,0,0), NA]
-@test isa(df[11][1][], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][2][], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][3][], ExcelReaders.ExcelErrorCell)
-@test isa(df[11][4][], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][1], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][2], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][3], ExcelReaders.ExcelErrorCell)
+@test isa(df[11][4], ExcelReaders.ExcelErrorCell)
 @test isa(df[12][1][], ExcelReaders.ExcelErrorCell)
 @test isa(df[12][2][], ExcelReaders.ExcelErrorCell)
 @test isa(df[12][3][], ExcelReaders.ExcelErrorCell)
