@@ -38,7 +38,7 @@ function gennames(n::Integer)
     return res
 end
 
-function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Int, startcol::Int, endrow::Int, endcol::Int; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
+function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
     data = ExcelReaders.readxl_internal(file, sheetname, startrow, startcol, endrow, endcol)
 
     nrow, ncol = size(data)
