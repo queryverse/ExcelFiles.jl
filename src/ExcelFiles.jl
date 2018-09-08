@@ -1,8 +1,8 @@
 module ExcelFiles
 
 
-using ExcelReaders, IteratorInterfaceExtensions, TableTraits, DataValues,
-    TableTraitsUtils, FileIO, TableShowUtils, Dates, Printf
+using ExcelReaders, IteratorInterfaceExtensions, TableTraits, DataValues
+using TableTraitsUtils, FileIO, TableShowUtils, Dates, Printf
 import IterableTables
 
 export load, save
