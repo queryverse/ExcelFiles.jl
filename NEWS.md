@@ -1,3 +1,6 @@
+# ExcelFiles.jl v0.6.1
+* Work around bug in pkg registry conversion script
+
 # ExcelFiles.jl v0.6.0
 * Drop julia 0.6 support, add julia 0.7 support
 
