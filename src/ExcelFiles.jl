@@ -97,17 +97,19 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
         excelfile = openxl(file.filename)
 
         sheetname, startrow, startcol, endrow, endcol = ExcelReaders.convert_ref_to_sheet_row_col(file.range)
-    
+
         _readxl(excelfile, sheetname, startrow, startcol, endrow, endcol; file.keywords...)
     else
         excelfile = openxl(file.filename)
         sheet = excelfile.workbook[:sheet_by_name](file.range)
-        startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; file.keywords...)
+
+        keywords = filter(i->!(i[1] in (:header, :colnames)), file.keywords)
+        startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)
 
         keywords2 = copy(file.keywords)
         keywords2 = filter(i->!(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
 
-        _readxl(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)    
+        _readxl(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)
     end
 
     return create_tableiterator(column_data, col_names)
