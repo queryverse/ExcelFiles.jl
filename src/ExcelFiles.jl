@@ -23,13 +23,13 @@ end
 
 Base.Multimedia.showable(::MIME"text/html", source::ExcelFile) = true
 
-function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data)
-    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data)
-    return XLSX.writetable(f.filename, cols, colnames)
-end
-
 function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
+end
+
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data)
+    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
+    return XLSX.writetable(f.filename, cols, colnames)
 end
 
 IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
