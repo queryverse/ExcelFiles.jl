@@ -22,6 +22,9 @@ function Base.show(io::IO, ::MIME"text/html", source::ExcelFile)
 end
 
 Base.Multimedia.showable(::MIME"text/html", source::ExcelFile) = true
+function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
+    return ExcelFile(f.filename, range, keywords)
+end
 
 function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; keywords...)
     sheetname="Sheet1"
@@ -30,12 +33,8 @@ function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; keywords...)
             sheetname = item.second
         end
     end
-    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data)
+    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
     return XLSX.writetable(f.filename, cols, colnames, sheetname=sheetname)
-end
-
-function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
-    return ExcelFile(f.filename, range, keywords)
 end
 
 IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
@@ -108,7 +107,7 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
         excelfile = openxl(file.filename)
 
         sheetname, startrow, startcol, endrow, endcol = ExcelReaders.convert_ref_to_sheet_row_col(file.range)
-    
+
         _readxl(excelfile, sheetname, startrow, startcol, endrow, endcol; file.keywords...)
     else
         excelfile = openxl(file.filename)
@@ -118,7 +117,7 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
         keywords2 = copy(file.keywords)
         keywords2 = filter(i->!(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
 
-        _readxl(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)    
+        _readxl(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)
     end
 
     return create_tableiterator(column_data, col_names)
