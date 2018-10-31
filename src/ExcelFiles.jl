@@ -26,13 +26,7 @@ function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
 
-function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; keywords...)
-    sheetname="Sheet1"
-    for item in keywords
-        if item.first == :sheetname
-            sheetname = item.second
-        end
-    end
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname="Sheet1")
     cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
     return XLSX.writetable(f.filename, cols, colnames, sheetname=sheetname)
 end
