@@ -23,9 +23,15 @@ end
 
 Base.Multimedia.showable(::MIME"text/html", source::ExcelFile) = true
 
-function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data)
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; keywords...)
+    sheetname="Sheet1"
+    for item in keywords
+        if item.first == :sheetname
+            sheetname = item.second
+        end
+    end
     cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data)
-    return XLSX.writetable(f.filename, cols, colnames)
+    return XLSX.writetable(f.filename, cols, colnames, sheetname=sheetname)
 end
 
 function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
