@@ -5,6 +5,7 @@ using TableTraits
 using TableTraitsUtils
 using Dates
 using DataValues
+using DataFrames
 using Test
 
 @testset "ExcelFiles" begin
@@ -87,11 +88,19 @@ df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", hea
 @test DataValues.isna(df[12][4])
 @test df[13] == [NA, 3.4, "HKEJW", NA]
 
+# Test for saving DataFrame to XLSX
+input = (Day=["Nov. 27","Nov. 28","Nov. 29"], Highest=[78,79,75]) |> DataFrame
+file = save("file.xlsx", input)
+output = load("file.xlsx", "Sheet1!A1:B4", header=true) |> DataFrame
+print(input == output)
+rm("file.xlsx")
+
 # Too few colnames
 @test_throws ErrorException create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", header=true, colnames=[:c1, :c2, :c3, :c4]))
 
 # Test for constructing DataFrame with empty header cell
 data, names = create_columns_from_iterabletable(load(filename, "Sheet2!C5:E7"))
 @test names == [:Col1, :x1, :Col3]
+
 
 end
