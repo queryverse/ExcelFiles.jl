@@ -92,7 +92,7 @@ df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", hea
 # Test for saving DataFrame to XLSX
 input = (Day=["Nov. 27","Nov. 28","Nov. 29"], Highest=[78,79,75]) |> DataFrame
 file = save("file.xlsx", input)
-output = load("file.xlsx", "Sheet1!A1:B4", header=true) |> DataFrame
+output = load("file.xlsx", "Sheet1") |> DataFrame
 @test input == output
 rm("file.xlsx")
 
