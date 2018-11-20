@@ -1,3 +1,6 @@
+# ExcelFiles.jl v0.7.0
+* Support writing of xlsx files
+
 # ExcelFiles.jl v0.6.1
 * Work around bug in pkg registry conversion script
 
