@@ -96,6 +96,13 @@ output = load("file.xlsx", "Sheet1") |> DataFrame
 @test input == output
 rm("file.xlsx")
 
+# Test for saving DataFrame to XLSX with sheetname keyword
+input = (Day=["Nov. 27","Nov. 28","Nov. 29"], Highest=[78,79,75]) |> DataFrame
+file = save("file.xlsx", input, sheetname="SheetName")
+output = load("file.xlsx", "SheetName") |> DataFrame
+@test input == output
+rm("file.xlsx")
+
 df, names = create_columns_from_iterabletable(load(filename, "Sheet1", colnames=good_colnames))
 @test names == good_colnames
 @test length(df[1]) == 4
