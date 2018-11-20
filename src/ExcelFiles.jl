@@ -1,7 +1,7 @@
 module ExcelFiles
 
 
-using ExcelReaders, IteratorInterfaceExtensions, TableTraits, DataValues
+using ExcelReaders, XLSX, IteratorInterfaceExtensions, TableTraits, DataValues
 using TableTraitsUtils, FileIO, TableShowUtils, Dates, Printf
 import IterableTables
 
@@ -25,6 +25,11 @@ Base.Multimedia.showable(::MIME"text/html", source::ExcelFile) = true
 
 function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
+end
+
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname::AbstractString="")
+    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
+    return XLSX.writetable(f.filename, cols, colnames; sheetname=sheetname)
 end
 
 IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
