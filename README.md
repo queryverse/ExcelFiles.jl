@@ -58,6 +58,16 @@ function load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
 * ``range``: either the name of the sheet in the Excel file to read, or a full Excel range specification (i.e. "Sheetname!A1:B2").
 * The ``keywords`` arguments are the same as in [ExcelReaders.jl](https://github.com/queryverse/ExcelReaders.jl) (which is used under the hood to read Excel files). When ``range`` is a sheet name, the keyword arguments for the ``readxlsheet`` function from ExcelReaders.jl apply, if ``range`` is a range specification, the keyword arguments for the ``readxl`` function apply.
 
+### Save an Excel file
+
+The following code saves any iterable table as a feather file:
+````julia
+using ExcelFiles
+
+save("output.xlsx", it)
+````
+This will work as long as it is any of the types supported as sources in IterableTables.jl.
+
 ### Using the pipe syntax
 
 ``load`` also support the pipe syntax. For example, to load an Excel file into a ``DataFrame``, one can use the following code:
