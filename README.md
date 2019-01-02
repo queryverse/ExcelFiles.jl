@@ -78,4 +78,14 @@ using ExcelFiles, DataFrame
 df = load("data.xlsx", "Sheet1") |> DataFrame
 ````
 
+To save an iterable table, one can use the following form:
+
+````julia
+using ExcelFiles, DataFrame
+
+df = # Aquire a DataFrame somehow
+
+df |> save("output.xlsx")
+````
+
 The pipe syntax is especially useful when combining it with [Query.jl](https://github.com/queryverse/Query.jl) queries, for example one can easily load an Excel file, pipe it into a query, then pipe it to the ``save`` function to store the results in a new file.
