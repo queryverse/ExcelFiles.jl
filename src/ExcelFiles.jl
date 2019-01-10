@@ -5,7 +5,7 @@ using ExcelReaders, XLSX, IteratorInterfaceExtensions, TableTraits, DataValues
 using TableTraitsUtils, FileIO, TableShowUtils, Dates, Printf
 import IterableTables
 
-export load, save
+export load, save, File, @format_str
 
 struct ExcelFile
     filename::String

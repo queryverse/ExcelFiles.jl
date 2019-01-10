@@ -1,3 +1,6 @@
+# ExcelFiles.jl v0.8.0
+* Export FileIO.File and FileIO.@format_str
+
 # ExcelFiles.jl v0.7.0
 * Support writing of xlsx files
 
