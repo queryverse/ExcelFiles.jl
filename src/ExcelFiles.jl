@@ -23,6 +23,12 @@ end
 
 Base.Multimedia.showable(::MIME"text/html", source::ExcelFile) = true
 
+function Base.show(io::IO, ::MIME"application/vnd.dataresource+json", source::ExcelFile)
+    TableShowUtils.printdataresource(io, getiterator(source))
+end
+
+Base.Multimedia.showable(::MIME"application/vnd.dataresource+json", source::ExcelFile) = true
+
 function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
