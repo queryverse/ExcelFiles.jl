@@ -60,7 +60,7 @@ function load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
 
 ### Save an Excel file
 
-The following code saves any iterable table as a feather file:
+The following code saves any iterable table as an excel file:
 ````julia
 using ExcelFiles
 
