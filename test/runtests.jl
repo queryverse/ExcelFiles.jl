@@ -14,6 +14,11 @@ filename = normpath(dirname(pathof(ExcelReaders)), "..", "test", "TestData.xlsx"
 
 efile = load(filename, "Sheet1")
 
+@test TableTraits.isiterabletable(efile) == true
+@test IteratorInterfaceExtensions.isiterable(efile) == true
+@test showable("text/html", efile) == true
+@test showable("application/vnd.dataresource+json", efile) == true
+
 @test isiterable(efile) == true
 
 full_dfs = [create_columns_from_iterabletable(load(filename, "Sheet1!C3:O7")), create_columns_from_iterabletable(load(filename, "Sheet1"))]
