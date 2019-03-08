@@ -112,7 +112,7 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
         _readxl(excelfile, sheetname, startrow, startcol, endrow, endcol; file.keywords...)
     else
         excelfile = openxl(file.filename)
-        sheet = excelfile.workbook[:sheet_by_name](file.range)
+        sheet = excelfile.workbook.sheet_by_name(file.range)
 
         keywords = filter(i->!(i[1] in (:header, :colnames)), file.keywords)
         startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)

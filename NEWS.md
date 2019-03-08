@@ -1,3 +1,6 @@
+# ExcelFiles.jl v0.9.1
+* Update to latest PyCall syntax
+
 # ExcelFiles.jl v0.9.0
 * Add support for "application/vnd.dataresource+json" MIME type
 
