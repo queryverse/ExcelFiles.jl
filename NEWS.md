@@ -1,6 +1,7 @@
 # ExcelFiles.jl v1.0.0
 * Drop julia 0.7 support
 * Migrate to Project.toml
+* Fix column type detection
 
 # ExcelFiles.jl v0.9.1
 * Update to latest PyCall syntax
