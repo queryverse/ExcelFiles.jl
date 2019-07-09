@@ -18,7 +18,7 @@ XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [compat]
 DataFrames = "≥ 0.14.1"
-DataValues = "≥ 0.4.4"
+DataValues = "≥ 0.4.11"
 ExcelReaders = "≥ 0.10.2"
 FileIO = "≥ 1.0.0"
 IterableTables = "≥ 0.8.3"
