@@ -87,7 +87,7 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
         end
 
         if type_of_el <: DataValue
-            columns[i] = convert(DataValueArray, vals)
+            columns[i] = convert(DataValueArray{eltype(type_of_el)}, vals)
 
             # TODO Check wether this hack is correct
             for (j,v) in enumerate(columns[i])
