@@ -26,7 +26,7 @@ IteratorInterfaceExtensions = "^0.1.1, ^1"
 PyCall = "≥ 1.90.0"
 TableShowUtils = "≥ 0.1.1"
 TableTraits = "^0.3.1, ^0.4, ^1"
-TableTraitsUtils = "≥ 0.3.0"
+TableTraitsUtils = "0.3, 0.4, 1"
 XLSX = "≥ 0.4.1"
 julia = "1"
 
