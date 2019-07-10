@@ -1,6 +1,6 @@
 name = "ExcelFiles"
 uuid = "89b67f3b-d1aa-5f6f-9ca4-282e8d98620d"
-version = "1.0.0-DEV"
+version = "1.0.1-DEV"
 
 [deps]
 DataValues = "e7dc6d0d-1eca-5fa6-8ad6-5aecde8b7ea5"
