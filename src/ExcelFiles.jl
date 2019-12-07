@@ -33,9 +33,9 @@ function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
 
-function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname::AbstractString="")
-    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
-    return XLSX.writetable(f.filename, cols, colnames; sheetname=sheetname)
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname::AbstractString = "")
+    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation = :missing)
+    return XLSX.writetable(f.filename, cols, colnames; sheetname = sheetname)
 end
 
 IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
@@ -49,12 +49,12 @@ function gennames(n::Integer)
     return res
 end
 
-function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
+function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool = true, colnames::Vector{Symbol} = Symbol[])
     data = ExcelReaders.readxl_internal(file, sheetname, startrow, startcol, endrow, endcol)
 
     nrow, ncol = size(data)
 
-    if length(colnames)==0
+    if length(colnames) == 0
         if header
             headervec = data[1, :]
             NAcol = map(i->isa(i, DataValues.DataValue) && DataValues.isna(i), headervec)
@@ -62,17 +62,17 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
 
             # This somewhat complicated conditional makes sure that column names
             # that are integer numbers end up without an extra ".0" as their name
-            colnames = [isa(i, AbstractFloat) ? ( modf(i)[1]==0.0 ? Symbol(Int(i)) : Symbol(string(i)) ) : Symbol(i) for i in vec(headervec)]
+            colnames = [isa(i, AbstractFloat) ? ( modf(i)[1] == 0.0 ? Symbol(Int(i)) : Symbol(string(i)) ) : Symbol(i) for i in vec(headervec)]
         else
             colnames = gennames(ncol)
         end
-    elseif length(colnames)!=ncol
+    elseif length(colnames) != ncol
         error("Length of colnames must equal number of columns in selected range")
     end
 
     columns = Array{Any}(undef, ncol)
 
-    for i=1:ncol
+    for i = 1:ncol
         if header
             vals = data[2:end,i]
         else
@@ -81,8 +81,8 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
 
         # Check whether all non-NA values in this column
         # are of the same type
-        type_of_el = length(vals)>0 ? typeof(vals[1]) : Any
-        for val=vals
+        type_of_el = length(vals) > 0 ? typeof(vals[1]) : Any
+        for val = vals
             type_of_el = promote_type(type_of_el, typeof(val))
         end
 
@@ -90,7 +90,7 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
             columns[i] = convert(DataValueArray{eltype(type_of_el)}, vals)
 
             # TODO Check wether this hack is correct
-            for (j,v) in enumerate(columns[i])
+            for (j, v) in enumerate(columns[i])
                 if v isa DataValue && !DataValues.isna(v) && v[] isa DataValue
                     columns[i][j] = v[]
                 end
