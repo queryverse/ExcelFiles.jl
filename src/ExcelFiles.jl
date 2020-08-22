@@ -33,9 +33,9 @@ function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
 
-function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname::AbstractString = "")
-    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation = :missing)
-    return XLSX.writetable(f.filename, cols, colnames; sheetname = sheetname)
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname::AbstractString="")
+    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
+    return XLSX.writetable(f.filename, cols, colnames; sheetname=sheetname)
 end
 
 IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
@@ -49,7 +49,7 @@ function gennames(n::Integer)
     return res
 end
 
-function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool = true, colnames::Vector{Symbol} = Symbol[])
+function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
     data = ExcelReaders.readxl_internal(file, sheetname, startrow, startcol, endrow, endcol)
 
     nrow, ncol = size(data)
@@ -57,7 +57,7 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
     if length(colnames) == 0
         if header
             headervec = data[1, :]
-            NAcol = map(i->isa(i, DataValues.DataValue) && DataValues.isna(i), headervec)
+            NAcol = map(i -> isa(i, DataValues.DataValue) && DataValues.isna(i), headervec)
             headervec[NAcol] = gennames(count(!iszero, NAcol))
 
             # This somewhat complicated conditional makes sure that column names
@@ -114,11 +114,11 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
         excelfile = openxl(file.filename)
         sheet = excelfile.workbook.sheet_by_name(file.range)
 
-        keywords = filter(i->!(i[1] in (:header, :colnames)), file.keywords)
+        keywords = filter(i -> !(i[1] in (:header, :colnames)), file.keywords)
         startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)
 
         keywords2 = copy(file.keywords)
-        keywords2 = filter(i->!(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
+        keywords2 = filter(i -> !(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
 
         _readxl(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)
     end
