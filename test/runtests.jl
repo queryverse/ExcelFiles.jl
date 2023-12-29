@@ -51,7 +51,7 @@ using Test
     end
 
     df, names = create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", header=false))
-    @test names == [:x1,:x2,:x3,:x4,:x5,:x6,:x7,:x8,:x9,:x10,:x11,:x12,:x13]
+    @test names == [:x1, :x2, :x3, :x4, :x5, :x6, :x7, :x8, :x9, :x10, :x11, :x12, :x13]
     @test length(df[1]) == 4
     @test length(df) == 13
     @test df[1] == [1., 1.5, 2., 2.5]
@@ -100,15 +100,15 @@ using Test
     @test DataValues.isna(df[12][4])
     @test df[13] == [NA, 3.4, "HKEJW", NA]
 
-# Test for saving DataFrame to XLSX
-    input = (Day = ["Nov. 27","Nov. 28","Nov. 29"], Highest = [78,79,75]) |> DataFrame
+    # Test for saving DataFrame to XLSX
+    input = (Day=["Nov. 27", "Nov. 28", "Nov. 29"], Highest=[78, 79, 75]) |> DataFrame
     file = save("file.xlsx", input)
     output = load("file.xlsx", "Sheet1") |> DataFrame
     @test input == output
     rm("file.xlsx")
 
-# Test for saving DataFrame to XLSX with sheetname keyword
-    input = (Day = ["Nov. 27","Nov. 28","Nov. 29"], Highest = [78,79,75]) |> DataFrame
+    # Test for saving DataFrame to XLSX with sheetname keyword
+    input = (Day=["Nov. 27", "Nov. 28", "Nov. 29"], Highest=[78, 79, 75]) |> DataFrame
     file = save("file.xlsx", input, sheetname="SheetName")
     output = load("file.xlsx", "SheetName") |> DataFrame
     @test input == output
@@ -138,10 +138,10 @@ using Test
     @test DataValues.isna(df[12][4])
     @test df[13] == [NA, 3.4, "HKEJW", NA]
 
-# Too few colnames
+    # Too few colnames
     @test_throws ErrorException create_columns_from_iterabletable(load(filename, "Sheet1!C4:O7", header=true, colnames=[:c1, :c2, :c3, :c4]))
 
-# Test for constructing DataFrame with empty header cell
+    # Test for constructing DataFrame with empty header cell
     data, names = create_columns_from_iterabletable(load(filename, "Sheet2!C5:E7"))
     @test names == [:Col1, :x1, :Col3]
 
