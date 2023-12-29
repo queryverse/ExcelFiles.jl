@@ -62,7 +62,7 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
 
             # This somewhat complicated conditional makes sure that column names
             # that are integer numbers end up without an extra ".0" as their name
-            colnames = [isa(i, AbstractFloat) ? ( modf(i)[1] == 0.0 ? Symbol(Int(i)) : Symbol(string(i)) ) : Symbol(i) for i in vec(headervec)]
+            colnames = [isa(i, AbstractFloat) ? (modf(i)[1] == 0.0 ? Symbol(Int(i)) : Symbol(string(i))) : Symbol(i) for i in vec(headervec)]
         else
             colnames = gennames(ncol)
         end
@@ -74,9 +74,9 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
 
     for i = 1:ncol
         if header
-            vals = data[2:end,i]
+            vals = data[2:end, i]
         else
-            vals = data[:,i]
+            vals = data[:, i]
         end
 
         # Check whether all non-NA values in this column
