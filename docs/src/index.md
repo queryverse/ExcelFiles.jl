@@ -84,20 +84,22 @@ This will work as long as it is any of the types supported as sources in Iterabl
 
 The `save` function takes a number of arguments and keywords:
 
-```
+```julia
     FileIO.save(
         source::String;
+        [sheetname::String],
         [overwrite::Bool]
     )
 ```
 
-### Arguments:
+#### Arguments:
 
-* `sheetname`: Specify the sheetname to be used in the created file. Default = `Sheet1`
+* `source`: The name of the file to be created on save.
 
-### Keywords:
+#### Keywords:
 
-* `overwrite`: Set `overwrite=true` to overwite any existing file of the same name. Default = `false`
+* `sheetname`: Specify the sheetname to be used in the created file. By default, the sheetname will be `Sheet1`.
+* `overwrite`: Set `overwrite=true` to overwite any existing file of the same name. Default = `false`.
 
 ## Using the pipe syntax
 
