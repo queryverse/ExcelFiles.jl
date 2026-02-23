@@ -48,16 +48,46 @@ end
 IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
 TableTraits.isiterabletable(x::ExcelFile) = true
 
+function dropkey(p::Base.Pairs, key::Symbol)                                                                                                                                 
+    nt = NamedTuple(p)                     # convert to NamedTuple                                                                                                           
+    NamedTuple{filter(!=(key), keys(nt))}(nt)                                                                                                                                
+end
+
 function _readxl(file::ExcelFile)
+    kw=NamedTuple(file.keywords)
+    if haskey(file.keywords, :transpose)
+        if file.keywords[:transpose]==true
+            haskey(kw, :first_row) && (kw=NamedTuple{filter(!=(:first_row), keys(kw))}(kw))
+            f=XLSX.readtransposedtable
+        else
+            haskey(kw, :first_column) && (kw=NamedTuple{filter(!=(:first_column), keys(kw))}(kw))
+            f=XLSX.readtable
+        end
+        kw=NamedTuple{filter(!=(:transpose), keys(kw))}(kw)
+    else
+        haskey(kw, :first_column) && (kw=NamedTuple{filter(!=(:first_column), keys(kw))}(kw))
+        f=XLSX.readtable
+    end
     if isnothing(file.columns)
         if isnothing(file.sheet)
-            table=XLSX.readtable(file.filename, "Sheet1"; file.keywords...)
+            table=f(file.filename; kw...)
         else
-            table=XLSX.readtable(file.filename, file.sheet; file.keywords...)
+            table=f(file.filename, file.sheet; kw...)
         end
     else
-        table=XLSX.readtable(file.filename, file.sheet, file.columns; file.keywords...)
+        table=f(file.filename, file.sheet, file.columns; kw...)
     end
+#    else
+#        if isnothing(file.columns)
+#            if isnothing(file.sheet)
+#                table=XLSX.readtable(file.filename; dropkey(file.keywords, :transpose)...)
+#            else
+#                table=XLSX.readtable(file.filename, file.sheet; dropkey(file.keywords, :transpose)...)
+#            end
+#        else
+#            table=XLSX.readtable(file.filename, file.sheet, file.columns; dropkey(file.keywords, :transpose)...)
+#        end
+#    end
     colnames=Vector{Symbol}(undef, length(table.data))
     for (k, v) in table.column_label_index
         colnames[v] = Symbol(k)

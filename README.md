@@ -62,11 +62,13 @@ The `load` function takes a number of arguments and keywords:
     FileIO.load(
         source::String,
         [sheet::String,
-        [columns::String]];
+        [range::String]];
         [first_row::Int],
+        [first_column::Int],
         [column_labels::Vector{String}],
         [header::Bool],
-        [normalizenames::Bool]
+        [normalizenames::Bool],
+        [transpose::Bool]
     )
 ```
 
@@ -74,14 +76,16 @@ The `load` function takes a number of arguments and keywords:
 
 * `source`: The name of the file to be loaded.
 * `sheet`: Specifies the sheet name to be loaded. If `sheet` is not given, the first Excel sheet in the file will be used.
-* `columns`: Determines which columns to read. For example, "B:D" will select columns B, C and D. If columns is not given, the algorithm will find the first sequence of consecutive non-empty cells. A valid sheet **must** be specified when specifying columns.
+* `range`: Determines which rows/columns to read. Given as a column range like `"A:F"` when `transpose=false` or as a row range like `"2:7"` when `transpose=true`. For example, `"B:D"` will select columns B, C and D. If `range` is not given, the algorithm will find the first sequence of consecutive non-empty cells. A valid `sheet` **must** be specified when specifying `range`.
 
 #### Keywords:
 
-* `first_row`: Indicates the first row of the data table to be read. For example, `first_row=5` will look for a table starting at sheet row 5. If first_row is not given, the algorithm will look for the first non-empty row in the sheet.
-* `header`: Indicates if the first row is a header. If `header=true` and `column_labels` is not specified, the column labels for the table will be read from the first row of the table. If `header=false` and `column_labels` is not specified, the algorithm will generate column labels. The default value is `header=true`.
-* `column_labels`: Specifies column names for the header of the table. If `column_labels` are given and `header=true`, the headers given by `column_labels` will be used, and the first row of the table (containing headers) will be ignored.
-* `normalizenames`: Set to `true` to normalize column names to valid Julia identifiers. Default=`false`
+* `first_row`: Indicates the first row of the data table to be read. For example, `first_row=5` will look for a table starting at sheet row 5. If first_row is not given, the algorithm will look for the first non-empty row in the sheet. This keyword will be ignored if `transpose=true`.
+* `first_column`: Indicates the first column of the data table to be read. For example, `first_column=5` or `first_column="E"` will look for a table starting at sheet column 5 ("E"). If first_row is not given, the algorithm will look for the first non-empty row in the sheet. This keyword will be ignored if `transpose=false`.
+* `header`: Indicates if the first row is a header. If `header=true` and `column_labels` is not specified, the column labels for the table will be read from the first row (or column if `transpose=true`) of the table. If `header=false` and `column_labels` is not specified, the algorithm will generate column labels. The default value is `header=true`.
+* `column_labels`: Specifies column names for the header of the table. If `column_labels` is given and `header=true`, the headers given by `column_labels` will be used, and the first row (or column if `transpose=true`) of the table (containing headers) will be ignored.
+* `normalizenames`: Set to `true` to normalize column names to valid Julia identifiers. Default=`false`.
+* `transpose`: Set to `true` to read a transposed table organised in rows rather than columns. Default=`false`.
 
 ### Save an Excel file
 
@@ -92,7 +96,7 @@ using ExcelFiles
 
 save("output.xlsx", it)
 ```
-This will work as long as it is any of the types supported as sources in IterableTables.jl (such as a `DataFrame`).
+This will work as long as `it` is any of the types supported as sources in IterableTables.jl (such as a `DataFrame`).
 
 The `save` function takes a number of arguments and keywords:
 

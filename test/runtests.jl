@@ -60,7 +60,7 @@ data_directory = joinpath(dirname(pathof(ExcelFiles)), "..", "data")
     end
 
     df, names = create_columns_from_iterabletable(load(filename, "Sheet1", "C:O"; first_row=4, header=false))
-     @test names == [:C, :D, :E, :F, :G, :H, :I, :J, :K, :L, :M, :N, :O]
+    @test names == [:C, :D, :E, :F, :G, :H, :I, :J, :K, :L, :M, :N, :O]
     @test length(df[1]) == 4
     @test length(df) == 13
     @test df[1] == [1., 1.5, 2., 2.5]
