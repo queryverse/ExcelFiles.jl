@@ -1,11 +1,8 @@
 module ExcelFiles
 
+using XLSX, FileIO, Tables, Dates
 
-using XLSX, IteratorInterfaceExtensions, TableTraits, DataValues
-using TableTraitsUtils, FileIO, TableShowUtils, Dates, Printf
-import IterableTables
-
-export load, save, File, @format_str
+export load, save, File
 
 struct ExcelFile
     filename::String
@@ -14,94 +11,72 @@ struct ExcelFile
     keywords
 end
 
-function Base.show(io::IO, source::ExcelFile)
-    TableShowUtils.printtable(io, getiterator(source), "Excel file")
+# --- Display ---
+
+# Radically simplified - now relies on universal adoption of Tables.jl among consumers.
+# Retain only basic show method.
+function Base.show(io::IO, f::ExcelFile)
+    print(io, "ExcelFile(\"$(f.filename)\")")
 end
 
-function Base.show(io::IO, ::MIME"text/html", source::ExcelFile)
-    TableShowUtils.printHTMLtable(io, getiterator(source))
-end
+# --- FileIO integration ---
 
-Base.Multimedia.showable(::MIME"text/html", source::ExcelFile) = true
-
-function Base.show(io::IO, ::MIME"application/vnd.dataresource+json", source::ExcelFile)
-    TableShowUtils.printdataresource(io, getiterator(source))
-end
-
-Base.Multimedia.showable(::MIME"application/vnd.dataresource+json", source::ExcelFile) = true
-
-function fileio_load(f::FileIO.File{FileIO.format"Excel", String}, sheet, columns; kw...)
+function fileio_load(f::FileIO.File{FileIO.format"Excel"}, sheet, columns; kw...)
     return ExcelFile(f.filename, sheet, columns, kw)
 end
-function fileio_load(f::FileIO.File{FileIO.format"Excel", String}, sheet; kw...)
+function fileio_load(f::FileIO.File{FileIO.format"Excel"}, sheet; kw...)
     return ExcelFile(f.filename, sheet, nothing, kw)
 end
-function fileio_load(f::FileIO.File{FileIO.format"Excel", String}; kw...)
+function fileio_load(f::FileIO.File{FileIO.format"Excel"}; kw...)
     return ExcelFile(f.filename, nothing, nothing, kw)
 end
 
 function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; kw...)
-    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
-    return XLSX.writetable(f.filename, cols, colnames; kw...)
+    XLSX.writetable(f.filename, data; kw...)
 end
 
-IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
-TableTraits.isiterabletable(x::ExcelFile) = true
+# --- Tables.jl interface ---
 
-function dropkey(p::Base.Pairs, key::Symbol)                                                                                                                                 
-    nt = NamedTuple(p)                     # convert to NamedTuple                                                                                                           
-    NamedTuple{filter(!=(key), keys(nt))}(nt)                                                                                                                                
+Tables.istable(::ExcelFile) = true
+Tables.columnaccess(::ExcelFile) = true
+
+function Tables.schema(file::ExcelFile)
+    tbl = _readxl(file)
+    return Tables.schema(tbl)
 end
+
+function Tables.columns(file::ExcelFile)
+    return Tables.columns(_readxl(file))
+end
+
+function Tables.rows(file::ExcelFile)
+    return Tables.rows(_readxl(file))
+end
+
+# --- Internal reader ---
 
 function _readxl(file::ExcelFile)
-    kw=NamedTuple(file.keywords)
-    if haskey(file.keywords, :transpose)
-        if file.keywords[:transpose]==true
-            haskey(kw, :first_row) && (kw=NamedTuple{filter(!=(:first_row), keys(kw))}(kw))
-            f=XLSX.readtransposedtable
-        else
-            haskey(kw, :first_column) && (kw=NamedTuple{filter(!=(:first_column), keys(kw))}(kw))
-            f=XLSX.readtable
-        end
-        kw=NamedTuple{filter(!=(:transpose), keys(kw))}(kw)
+    kw = NamedTuple(file.keywords)
+
+    if get(kw, :transpose, false)
+        f = XLSX.readtransposedtable
+        kw = NamedTuple{filter(k -> k ∉ (:transpose, :first_row), keys(kw))}(kw)
     else
-        haskey(kw, :first_column) && (kw=NamedTuple{filter(!=(:first_column), keys(kw))}(kw))
-        f=XLSX.readtable
+        f = XLSX.readtable
+        kw = NamedTuple{filter(k -> k ∉ (:transpose, :first_column), keys(kw))}(kw)
     end
+
     if isnothing(file.columns)
         if isnothing(file.sheet)
-            table=f(file.filename; kw...)
+            table = f(file.filename; kw...)
         else
-            table=f(file.filename, file.sheet; kw...)
+            table = f(file.filename, file.sheet; kw...)
         end
     else
-        table=f(file.filename, file.sheet, file.columns; kw...)
+        table = f(file.filename, file.sheet, file.columns; kw...)
     end
-#    else
-#        if isnothing(file.columns)
-#            if isnothing(file.sheet)
-#                table=XLSX.readtable(file.filename; dropkey(file.keywords, :transpose)...)
-#            else
-#                table=XLSX.readtable(file.filename, file.sheet; dropkey(file.keywords, :transpose)...)
-#            end
-#        else
-#            table=XLSX.readtable(file.filename, file.sheet, file.columns; dropkey(file.keywords, :transpose)...)
-#        end
-#    end
-    colnames=Vector{Symbol}(undef, length(table.data))
-    for (k, v) in table.column_label_index
-        colnames[v] = Symbol(k)
-    end
-    return table.data, colnames
-end
 
-function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
-    column_data, col_names = _readxl(file)
-    return create_tableiterator(column_data, col_names)
-end
-
-function Base.collect(file::ExcelFile)
-    return collect(getiterator(file))
+    return table  # XLSX v0.11 returns a Tables.jl-compatible object directly
 end
 
 end # module
