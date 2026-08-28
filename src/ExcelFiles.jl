@@ -49,7 +49,7 @@ function gennames(n::Integer)
     return res
 end
 
-function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
+function _readxls(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
     data = ExcelReaders.readxl_internal(file, sheetname, startrow, startcol, endrow, endcol)
 
     nrow, ncol = size(data)
@@ -103,24 +103,110 @@ function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startr
     return columns, colnames
 end
 
+function process_xlsx_data(data; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
+    nrow, ncol = size(data)
+
+    if length(colnames) == 0
+        if header
+            headervec = data[1, :]
+            NAcol = map(i -> isa(i, DataValues.DataValue) && DataValues.isna(i), headervec)
+            headervec[NAcol] = gennames(count(!iszero, NAcol))
+
+            # This somewhat complicated conditional makes sure that column names
+            # that are integer numbers end up without an extra ".0" as their name
+            colnames = [isa(i, AbstractFloat) ? ( modf(i)[1] == 0.0 ? Symbol(Int(i)) : Symbol(string(i)) ) : Symbol(i) for i in vec(headervec)]
+        else
+            colnames = gennames(ncol)
+        end
+    elseif length(colnames) != ncol
+        error("Length of colnames must equal number of columns in selected range")
+    end
+
+    columns = Array{Any}(undef, ncol)
+
+    for i = 1:ncol
+        if header
+            vals = data[2:end,i]
+        else
+            vals = data[:,i]
+        end
+
+        # Check whether all non-NA values in this column
+        # are of the same type
+        type_of_el = length(vals) > 0 ? typeof(vals[1]) : Any
+        for val = vals
+            type_of_el = promote_type(type_of_el, typeof(val))
+        end
+
+        if type_of_el <: DataValue
+            columns[i] = convert(DataValueArray{eltype(type_of_el)}, vals)
+
+            # TODO Check wether this hack is correct
+            for (j, v) in enumerate(columns[i])
+                if v isa DataValue && !DataValues.isna(v) && v[] isa DataValue
+                    columns[i][j] = v[]
+                end
+            end
+        else
+            columns[i] = convert(Array{type_of_el}, vals)
+        end
+    end
+
+    return columns, colnames
+end
+
+function _readxlsx(file, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
+    data = ExcelReaders.readxl_internal(file, sheetname, startrow, startcol, endrow, endcol)
+
+    
+end
+
+function _readxlsx(file, range; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
+    data = ExcelReaders.readxl_internal(file, sheetname, startrow, startcol, endrow, endcol)
+
+    process_xlsx_data(data, header=header, colnames=colnames)
+end
+
 function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
+    old_style_excel_file = endswith(file.filename, ".xls")
+
     column_data, col_names = if occursin("!", file.range)
-        excelfile = openxl(file.filename)
+        if old_style_excel_file
+            excelfile = openxl(file.filename)
 
-        sheetname, startrow, startcol, endrow, endcol = ExcelReaders.convert_ref_to_sheet_row_col(file.range)
+            sheetname, startrow, startcol, endrow, endcol = ExcelReaders.convert_ref_to_sheet_row_col(file.range)
 
-        _readxl(excelfile, sheetname, startrow, startcol, endrow, endcol; file.keywords...)
+            _readxls(excelfile, sheetname, startrow, startcol, endrow, endcol; file.keywords...)            
+        else
+            excelfile = XLSX.readxlsx(file.filename)
+
+            _readxlsx(excelfile, file.range; file.keywords...)
+        end
     else
-        excelfile = openxl(file.filename)
-        sheet = excelfile.workbook.sheet_by_name(file.range)
+        if old_style_excel_file
+            excelfile = openxl(file.filename)
+            sheet = excelfile.workbook.sheet_by_name(file.range)
 
-        keywords = filter(i -> !(i[1] in (:header, :colnames)), file.keywords)
-        startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)
+            keywords = filter(i -> !(i[1] in (:header, :colnames)), file.keywords)
+            startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)
 
-        keywords2 = copy(file.keywords)
-        keywords2 = filter(i -> !(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
+            keywords2 = copy(file.keywords)
+            keywords2 = filter(i -> !(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
 
-        _readxl(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)
+            _readxls(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)
+        else
+            excelfile = openxl(file.filename)
+
+            sheet = excelfile[file.range]
+
+            keywords = filter(i -> !(i[1] in (:header, :colnames)), file.keywords)
+            startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)
+
+            keywords2 = copy(file.keywords)
+            keywords2 = filter(i -> !(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
+
+            _readxls(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)
+        end
     end
 
     return create_tableiterator(column_data, col_names)
