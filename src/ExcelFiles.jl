@@ -7,6 +7,30 @@ import IterableTables
 
 export load, save, File, @format_str
 
+function __init__()
+    # Since FileIO PR #439 (July 2026) the central FileIO registry routes
+    # format"Excel" to XLSX.jl's own FileIO extension, and no longer covers
+    # legacy xls files at all. Loading ExcelFiles puts its loader first
+    # again, and registers a format for xls files. Users who don't load
+    # ExcelFiles are unaffected.
+    try
+        loaders = get!(Vector{FileIO.ActionSource}, FileIO.sym2loader, :Excel)
+        filter!(x -> x !== ExcelFiles, loaders)
+        pushfirst!(loaders, ExcelFiles)
+        savers = get!(Vector{FileIO.ActionSource}, FileIO.sym2saver, :Excel)
+        filter!(x -> x !== ExcelFiles, savers)
+        pushfirst!(savers, ExcelFiles)
+
+        if !haskey(FileIO.sym2info, :ExcelLegacy)
+            FileIO.add_format(FileIO.format"ExcelLegacy", (), [".xls"],
+                [:ExcelFiles => Base.UUID("89b67f3b-d1aa-5f6f-9ca4-282e8d98620d"), FileIO.LOAD])
+        end
+    catch err
+        @warn "ExcelFiles could not register itself with FileIO. Loading Excel files via FileIO.load may not use ExcelFiles." exception = (err, catch_backtrace())
+    end
+    return nothing
+end
+
 struct ExcelFile
     filename::String
     range::String
@@ -29,13 +53,19 @@ end
 
 Base.Multimedia.showable(::MIME"application/vnd.dataresource+json", source::ExcelFile) = true
 
-function fileio_load(f::FileIO.File{FileIO.format"Excel"}, range; keywords...)
+const ExcelFileFormat = Union{FileIO.File{FileIO.format"Excel"},FileIO.File{FileIO.format"ExcelLegacy"}}
+
+function fileio_load(f::ExcelFileFormat, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
 
 function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname::AbstractString="")
     cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
     return XLSX.writetable(f.filename, cols, colnames; sheetname=sheetname)
+end
+
+function fileio_save(f::FileIO.File{FileIO.format"ExcelLegacy"}, data; kwargs...)
+    error("Writing legacy xls files is not supported. Save to an xlsx file instead.")
 end
 
 IteratorInterfaceExtensions.isiterable(x::ExcelFile) = true
@@ -112,7 +142,7 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
         _readxl(excelfile, sheetname, startrow, startcol, endrow, endcol; file.keywords...)
     else
         excelfile = openxl(file.filename)
-        sheet = excelfile.workbook.sheet_by_name(file.range)
+        sheet = ExcelReaders.sheet_handle(excelfile, file.range)
 
         keywords = filter(i -> !(i[1] in (:header, :colnames)), file.keywords)
         startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)
