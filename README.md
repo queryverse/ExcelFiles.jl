@@ -1,14 +1,21 @@
 # ExcelFiles
 
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Build Status](https://travis-ci.org/queryverse/ExcelFiles.jl.svg?branch=master)](https://travis-ci.org/queryverse/ExcelFiles.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/wfx5avj0s2m0x94w/branch/master?svg=true)](https://ci.appveyor.com/project/queryverse/excelfiles-jl/branch/master)
+[![Build Status](https://github.com/queryverse/ExcelFiles.jl/actions/workflows/juliaci.yml/badge.svg?branch=main)](https://github.com/queryverse/ExcelFiles.jl/actions/workflows/juliaci.yml)
 [![codecov.io](http://codecov.io/github/queryverse/ExcelFiles.jl/coverage.svg?branch=master)](http://codecov.io/github/queryverse/ExcelFiles.jl?branch=master)
 
 ## Overview
 
 This package provides load support for Excel files under the
-[FileIO.jl](https://github.com/JuliaIO/FileIO.jl) package.
+[FileIO.jl](https://github.com/JuliaIO/FileIO.jl) package. Both modern xlsx
+files and legacy xls files can be loaded (the format is detected from the
+content of the file); saving is supported for xlsx files.
+
+Note that the central FileIO registry routes Excel files to
+[XLSX.jl](https://github.com/JuliaData/XLSX.jl) and does not cover xls files.
+Once ExcelFiles is loaded (``using ExcelFiles``), its loader takes priority,
+which restores range-based loading (``"Sheet1!A1:C4"``), the lazy iterable
+table interface, and support for xls files.
 
 ## Installation
 
