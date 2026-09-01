@@ -1,3 +1,15 @@
+# ExcelFiles.jl v1.0.1
+* Loading goes through the rewritten ExcelReaders 1.0: legacy xls files are
+  read natively via LibXLS.jl and modern xlsx files via XLSX.jl, without any
+  Python dependency
+* Restore the FileIO integration: the central FileIO registry now routes
+  Excel files to XLSX.jl and no longer covers xls files at all, so loading
+  ExcelFiles puts its loader first again and registers a format for xls
+  files; users who don't load ExcelFiles are unaffected
+* Saving to an xls file gives a clear error (writing the legacy format is
+  not supported)
+* Minimum supported Julia version is 1.10 (required by XLSX 0.12)
+
 # ExcelFiles.jl v1.0.0
 * Drop julia 0.7 support
 * Migrate to Project.toml
