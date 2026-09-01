@@ -166,3 +166,59 @@ end
     @test size(df2) == (4, 13)
     @test df2[!, 1] == [1., 1.5, 2., 2.5]
 end
+
+@testitem "FileIO parity features" begin
+    using ExcelReaders
+    using TableTraitsUtils
+    using Dates
+    using DataValues
+    using DataFrames
+    import Tables
+
+    filename = normpath(dirname(pathof(ExcelReaders)), "..", "test", "TestData.xlsx")
+    filename_xls = normpath(dirname(pathof(ExcelReaders)), "..", "test", "TestData.xls")
+
+    # zero-arg load defaults to the first sheet
+    df = DataFrame(load(filename))
+    @test size(df) == (4, 13)
+    @test df[!, 1] == [1., 1.5, 2., 2.5]
+    df_xls = DataFrame(load(filename_xls))
+    @test df_xls[!, 1] == [1., 1.5, 2., 2.5]
+
+    # transpose (issue #12)
+    data, names = create_columns_from_iterabletable(load(filename, "Sheet1!C3:D5", header=false, transpose=true))
+    @test length(data) == 3
+    @test data[1] == ["Some Float64s", "Some Strings"]
+    @test data[2] == [1.0, "A"]
+    @test data[3] == [1.5, "BB"]
+
+    # the lazy return is a Tables.jl source for any sink
+    ef = load(filename, "Sheet1")
+    cols = Tables.columns(ef)
+    @test length(Tables.columnnames(cols)) == 13
+    @test collect(skipmissing(Tables.getcolumn(cols, 1))) == [1., 1.5, 2., 2.5]
+
+    dir = mktempdir()
+
+    # save overwrites existing files by default (issue #24)
+    path = joinpath(dir, "overwrite.xlsx")
+    input = (a = [1.0, 2.0], b = ["x", "y"]) |> DataFrame
+    save(path, input)
+    save(path, input)
+    @test DataFrame(load(path, "Sheet1")) == input
+    @test_throws Exception save(path, input, overwrite = false)
+
+    # save accepts plain Tables.jl sources that are not iterable tables
+    path2 = joinpath(dir, "tables.xlsx")
+    save(path2, Tables.table([1 2; 3 4]))
+    back = DataFrame(load(path2, "Sheet1"))
+    @test back[!, 1] == [1.0, 3.0]
+    @test back[!, 2] == [2.0, 4.0]
+
+    # multi-sheet save (issue #38)
+    path3 = joinpath(dir, "multi.xlsx")
+    input2 = (c = [10.0, 20.0], d = ["u", "v"]) |> DataFrame
+    save(path3, "First" => input, "Second" => input2)
+    @test DataFrame(load(path3, "First")) == input
+    @test DataFrame(load(path3, "Second")) == input2
+end

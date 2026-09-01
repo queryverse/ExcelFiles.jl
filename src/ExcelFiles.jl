@@ -55,13 +55,31 @@ Base.Multimedia.showable(::MIME"application/vnd.dataresource+json", source::Exce
 
 const ExcelFileFormat = Union{FileIO.File{FileIO.format"Excel"},FileIO.File{FileIO.format"ExcelLegacy"}}
 
+# Without a sheet or range argument the first sheet is loaded (resolved
+# lazily at iteration time).
+function fileio_load(f::ExcelFileFormat; keywords...)
+    return ExcelFile(f.filename, "", keywords)
+end
+
 function fileio_load(f::ExcelFileFormat, range; keywords...)
     return ExcelFile(f.filename, range, keywords)
 end
 
-function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; sheetname::AbstractString="")
-    cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
-    return XLSX.writetable(f.filename, cols, colnames; sheetname=sheetname)
+# Any iterable table or Tables.jl source can be saved; keyword arguments
+# (sheetname, anchor_cell, ...) are passed through to XLSX.writetable.
+# Unlike XLSX.writetable, an existing file is overwritten by default, in line
+# with the conventions of other FileIO formats.
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, data; overwrite::Bool=true, kwargs...)
+    if TableTraits.isiterabletable(data) === true
+        cols, colnames = TableTraitsUtils.create_columns_from_iterabletable(data, na_representation=:missing)
+        return XLSX.writetable(f.filename, cols, colnames; overwrite=overwrite, kwargs...)
+    else
+        return XLSX.writetable(f.filename, data; overwrite=overwrite, kwargs...)
+    end
+end
+
+function fileio_save(f::FileIO.File{FileIO.format"Excel"}, tables::Pair...; overwrite::Bool=true, kwargs...)
+    return XLSX.writetable(f.filename, tables...; overwrite=overwrite, kwargs...)
 end
 
 function fileio_save(f::FileIO.File{FileIO.format"ExcelLegacy"}, data; kwargs...)
@@ -79,8 +97,12 @@ function gennames(n::Integer)
     return res
 end
 
-function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[])
+function _readxl(file::ExcelReaders.ExcelFile, sheetname::AbstractString, startrow::Integer, startcol::Integer, endrow::Integer, endcol::Integer; header::Bool=true, colnames::Vector{Symbol}=Symbol[], transpose::Bool=false)
     data = ExcelReaders.readxl_internal(file, sheetname, startrow, startcol, endrow, endcol)
+
+    if transpose
+        data = permutedims(data)
+    end
 
     nrow, ncol = size(data)
 
@@ -142,15 +164,16 @@ function IteratorInterfaceExtensions.getiterator(file::ExcelFile)
         _readxl(excelfile, sheetname, startrow, startcol, endrow, endcol; file.keywords...)
     else
         excelfile = openxl(file.filename)
-        sheet = ExcelReaders.sheet_handle(excelfile, file.range)
+        sheetname = isempty(file.range) ? ExcelReaders.sheetnames(excelfile)[1] : file.range
+        sheet = ExcelReaders.sheet_handle(excelfile, sheetname)
 
-        keywords = filter(i -> !(i[1] in (:header, :colnames)), file.keywords)
+        keywords = filter(i -> !(i[1] in (:header, :colnames, :transpose)), file.keywords)
         startrow, startcol, endrow, endcol = ExcelReaders.convert_args_to_row_col(sheet; keywords...)
 
         keywords2 = copy(file.keywords)
         keywords2 = filter(i -> !(i[1] in (:skipstartrows, :skipstartcols, :nrows, :ncols)), file.keywords)
 
-        _readxl(excelfile, file.range, startrow, startcol, endrow, endcol; keywords2...)
+        _readxl(excelfile, sheetname, startrow, startcol, endrow, endcol; keywords2...)
     end
 
     return create_tableiterator(column_data, col_names)

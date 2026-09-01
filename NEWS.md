@@ -1,3 +1,12 @@
+# ExcelFiles.jl v1.1.0
+* `load("file.xlsx")` without a sheet argument loads the first sheet
+* New `transpose=true` keyword for `load`, for sheets organized in rows
+  rather than columns
+* `save` accepts any Tables.jl source in addition to iterable tables, can
+  write multiple sheets via `save(file, "name" => table, ...)`, overwrites
+  existing files by default (pass `overwrite=false` for an error instead),
+  and passes keyword arguments through to `XLSX.writetable`
+
 # ExcelFiles.jl v1.0.1
 * Loading goes through the rewritten ExcelReaders 1.0: legacy xls files are
   read natively via LibXLS.jl and modern xlsx files via XLSX.jl, without any
