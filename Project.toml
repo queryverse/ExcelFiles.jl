@@ -26,7 +26,7 @@ Printf = "1"
 TableShowUtils = "0.2, 0.3, 1"
 TableTraits = "0.3.1, 0.4, 1"
 TableTraitsUtils = "0.3, 0.4, 1"
-XLSX = "0.12"
+XLSX = "0.12, 0.13"
 julia = "1.10"
 
 [extras]
